@@ -85,15 +85,17 @@ type wikiAPIResponse struct {
 }
 
 // traceToPhilosophy starts at the given article and repeatedly follows
-// the first valid link until it reaches the Philosophy article (or an
-// error condition such as a loop or missing link).
-func traceToPhilosophy(ctx context.Context, word, lang string) ([]string, bool, error) {
+// the first valid link until it reaches the target article (or an
+// error condition such as a loop or missing link). If target is empty,
+// it defaults to the Philosophy article for the given language.
+func traceToPhilosophy(ctx context.Context, word, lang, target string) ([]string, bool, error) {
 	if !validLang(lang) {
 		return nil, false, fmt.Errorf("unsupported language code %q", lang)
 	}
 
-	target := philosophyTitles[lang]
-
+	if target == "" {
+		target = philosophyTitles[lang]
+	}
 	visited := make(map[string]bool)
 	var steps []string
 	current := word

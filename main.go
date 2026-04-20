@@ -15,6 +15,7 @@ const traceTimeout = 2 * time.Minute
 type traceRequest struct {
 	Word     string `json:"word"`
 	Language string `json:"language"`
+	Target   string `json:"target"`
 }
 
 type traceResponse struct {
@@ -47,7 +48,7 @@ func handleTrace(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), traceTimeout)
 	defer cancel()
 
-	steps, found, err := traceToPhilosophy(ctx, req.Word, req.Language)
+	steps, found, err := traceToPhilosophy(ctx, req.Word, req.Language, req.Target)
 	resp := traceResponse{
 		Steps: steps,
 		Found: found,
