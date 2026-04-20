@@ -183,9 +183,9 @@
     <header>
       <h1>🏛️ Getting to Philosophy</h1>
       <p>
-        Enter any Wikipedia article title, choose a language, and the app will<br />
-        follow the first valid link in each article — skipping bracketed text,<br />
-        italics, and footnotes — until it reaches <em>Philosophy</em>.
+        Enter any Wikipedia article title, choose a language, and optionally a target article.<br />
+        The app will follow the first valid link in each article — skipping bracketed text,<br />
+        italics, and footnotes — until it reaches the target (default: <em>Philosophy</em>).
       </p>
     </header>
 
@@ -195,6 +195,10 @@
           <div class="form-group flex-1">
             <label for="word">Article title</label>
             <input type="text" id="word" name="word" placeholder="e.g. Computer" autocomplete="off" required />
+          </div>
+          <div class="form-group flex-1">
+            <label for="target">Target article</label>
+            <input type="text" id="target" name="target" placeholder="Philosophy" autocomplete="off" />
           </div>
           <div class="form-group">
             <label for="language">Language</label>
@@ -229,7 +233,7 @@
     </div>
 
     <div id="loadingArea" class="card loading-area" style="display:none">
-      <span class="spinner"></span>Tracing path to Philosophy…
+      <span class="spinner"></span><span id="loadingMsg">Tracing path to Philosophy…</span>
     </div>
 
     <div id="errorArea" class="card" style="display:none">
@@ -261,19 +265,24 @@
 
       const word     = document.getElementById('word').value.trim();
       const language = document.getElementById('language').value;
+      const target      = document.getElementById('target').value.trim();
+      const targetLabel = target || 'Philosophy';
       if (!word) return;
 
       // Reset UI
       loadingArea.style.display = 'block';
+      document.getElementById('loadingMsg').textContent = `Tracing path to ${targetLabel}…`;
       errorArea.style.display   = 'none';
       resultsArea.style.display = 'none';
       submitBtn.disabled = true;
 
       try {
+        const body = { word, language };
+        if (target) body.target = target;
         const res = await fetch('/api/trace', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ word, language }),
+          body: JSON.stringify(body),
         });
 
         if (!res.ok) {
@@ -316,10 +325,10 @@
           if (data.found) {
             resultBanner.className = 'result-banner success';
             resultBanner.textContent =
-              `✓ Reached Philosophy in ${links} step${links !== 1 ? 's' : ''}!`;
+              `✓ Reached ${targetLabel} in ${links} step${links !== 1 ? 's' : ''}!`;
           } else {
             resultBanner.className = 'result-banner partial';
-            resultBanner.textContent = '⚠ Philosophy not reached';
+            resultBanner.textContent = `⚠ ${targetLabel} not reached`;
           }
 
           stepCount.textContent =
