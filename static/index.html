@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting to Philosophy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #202122;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      color: #3366cc;
+      margin-bottom: 0.4rem;
+    }
+
+    header p {
+      color: #54595d;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #a2a9b1;
+      border-radius: 4px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-group.flex-1 { flex: 1; min-width: 180px; }
+
+    label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #54595d;
+    }
+
+    input[type="text"], select {
+      padding: 0.5rem 0.7rem;
+      border: 1px solid #a2a9b1;
+      border-radius: 2px;
+      font-size: 1rem;
+      background: #fff;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: #3366cc;
+      box-shadow: 0 0 0 2px rgba(51,102,204,0.2);
+    }
+
+    button {
+      padding: 0.55rem 1.4rem;
+      background: #3366cc;
+      color: #fff;
+      border: 1px solid #2a4b8d;
+      border-radius: 2px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    button:hover { background: #2a4b8d; }
+    button:disabled { background: #c8ccd1; border-color: #a2a9b1; cursor: not-allowed; }
+
+    /* Loading */
+    .loading-area {
+      text-align: center;
+      padding: 1.5rem;
+      color: #54595d;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #c8ccd1;
+      border-top-color: #3366cc;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error */
+    .error-box {
+      background: #fee7e6;
+      border: 1px solid #d33;
+      border-radius: 2px;
+      padding: 0.75rem 1rem;
+      color: #b32424;
+      font-size: 0.95rem;
+    }
+
+    /* Results */
+    .result-header {
+      margin-bottom: 1rem;
+    }
+
+    .result-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-banner.success { color: #14866d; }
+    .result-banner.partial { color: #ac6600; }
+
+    .step-count {
+      font-size: 0.9rem;
+      color: #54595d;
+    }
+
+    .steps-list {
+      list-style: decimal;
+      padding-left: 1.8rem;
+      line-height: 2;
+    }
+
+    .steps-list li a {
+      color: #3366cc;
+      text-decoration: none;
+    }
+
+    .steps-list li a:hover { text-decoration: underline; }
+
+    .steps-list li:last-child a {
+      font-weight: 700;
+    }
+
+    .steps-list li:last-child.reached a {
+      color: #14866d;
+    }
+
+    .step-note {
+      font-size: 0.8rem;
+      color: #72777d;
+      margin-left: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🏛️ Getting to Philosophy</h1>
+      <p>
+        Enter any Wikipedia article title, choose a language, and the app will<br />
+        follow the first valid link in each article — skipping bracketed text,<br />
+        italics, and footnotes — until it reaches <em>Philosophy</em>.
+      </p>
+    </header>
+
+    <div class="card">
+      <form id="traceForm">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="word">Article title</label>
+            <input type="text" id="word" name="word" placeholder="e.g. Computer" autocomplete="off" required />
+          </div>
+          <div class="form-group">
+            <label for="language">Language</label>
+            <select id="language" name="language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+              <option value="it">Italiano</option>
+              <option value="pt">Português</option>
+              <option value="nl">Nederlands</option>
+              <option value="pl">Polski</option>
+              <option value="ru">Русский</option>
+              <option value="ja">日本語</option>
+              <option value="zh">中文</option>
+              <option value="ar">العربية</option>
+              <option value="ko">한국어</option>
+              <option value="sv">Svenska</option>
+              <option value="da">Dansk</option>
+              <option value="nb">Norsk</option>
+              <option value="fi">Suomi</option>
+              <option value="hu">Magyar</option>
+              <option value="cs">Čeština</option>
+              <option value="ro">Română</option>
+              <option value="tr">Türkçe</option>
+              <option value="uk">Українська</option>
+            </select>
+          </div>
+          <button type="submit" id="submitBtn">Trace →</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="loadingArea" class="card loading-area" style="display:none">
+      <span class="spinner"></span>Tracing path to Philosophy…
+    </div>
+
+    <div id="errorArea" class="card" style="display:none">
+      <div class="error-box" id="errorMsg"></div>
+    </div>
+
+    <div id="resultsArea" class="card" style="display:none">
+      <div class="result-header">
+        <div class="result-banner" id="resultBanner"></div>
+        <div class="step-count" id="stepCount"></div>
+      </div>
+      <ol class="steps-list" id="stepsList"></ol>
+    </div>
+  </div>
+
+  <script>
+    const form        = document.getElementById('traceForm');
+    const submitBtn   = document.getElementById('submitBtn');
+    const loadingArea = document.getElementById('loadingArea');
+    const errorArea   = document.getElementById('errorArea');
+    const errorMsg    = document.getElementById('errorMsg');
+    const resultsArea = document.getElementById('resultsArea');
+    const resultBanner = document.getElementById('resultBanner');
+    const stepCount   = document.getElementById('stepCount');
+    const stepsList   = document.getElementById('stepsList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const word     = document.getElementById('word').value.trim();
+      const language = document.getElementById('language').value;
+      if (!word) return;
+
+      // Reset UI
+      loadingArea.style.display = 'block';
+      errorArea.style.display   = 'none';
+      resultsArea.style.display = 'none';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch('/api/trace', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ word, language }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server error: ${res.status} ${res.statusText}`);
+        }
+
+        const data = await res.json();
+        loadingArea.style.display = 'none';
+
+        if (data.steps && data.steps.length > 0) {
+          // Build the numbered list
+          stepsList.innerHTML = '';
+          const steps = data.steps;
+          steps.forEach((step, idx) => {
+            const li = document.createElement('li');
+            const a  = document.createElement('a');
+            a.href   = `https://${language}.wikipedia.org/wiki/${encodeURIComponent(step.replace(/ /g, '_'))}`;
+            a.target = '_blank';
+            a.rel    = 'noopener noreferrer';
+            a.textContent = step;
+            li.appendChild(a);
+
+            if (idx === steps.length - 1) {
+              if (data.found) {
+                li.classList.add('reached');
+              }
+              if (idx === 0) {
+                const note = document.createElement('span');
+                note.className = 'step-note';
+                note.textContent = '(starting article)';
+                li.appendChild(note);
+              }
+            }
+            stepsList.appendChild(li);
+          });
+
+          const n = steps.length;
+          const links = n - 1;
+
+          if (data.found) {
+            resultBanner.className = 'result-banner success';
+            resultBanner.textContent =
+              `✓ Reached Philosophy in ${links} step${links !== 1 ? 's' : ''}!`;
+          } else {
+            resultBanner.className = 'result-banner partial';
+            resultBanner.textContent = '⚠ Philosophy not reached';
+          }
+
+          stepCount.textContent =
+            `${n} article${n !== 1 ? 's' : ''} visited • ${links} link${links !== 1 ? 's' : ''} followed`;
+
+          // Show inline error if partial
+          if (data.error) {
+            errorMsg.textContent      = data.error;
+            errorArea.style.display   = 'block';
+          }
+
+          resultsArea.style.display = 'block';
+        } else if (data.error) {
+          errorMsg.textContent    = data.error;
+          errorArea.style.display = 'block';
+        }
+      } catch (err) {
+        loadingArea.style.display = 'none';
+        errorMsg.textContent      = 'Request failed: ' + err.message;
+        errorArea.style.display   = 'block';
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
